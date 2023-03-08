@@ -34,6 +34,7 @@ import {
   AtlassianAuth,
   createFetchApi,
   FetchMiddlewares,
+  SlackAuth,
 } from '@backstage/core-app-api';
 
 import {
@@ -56,6 +57,7 @@ import {
   bitbucketAuthApiRef,
   bitbucketServerAuthApiRef,
   atlassianAuthApiRef,
+  slackAuthApiRef,
 } from '@backstage/core-plugin-api';
 import {
   permissionApiRef,
@@ -161,6 +163,21 @@ export const apis = [
         discoveryApi,
         oauthRequestApi,
         defaultScopes: ['read:user'],
+        environment: configApi.getOptionalString('auth.environment'),
+      }),
+  }),
+  createApiFactory({
+    api: slackAuthApiRef,
+    deps: {
+      discoveryApi: discoveryApiRef,
+      oauthRequestApi: oauthRequestApiRef,
+      configApi: configApiRef,
+    },
+    factory: ({ discoveryApi, oauthRequestApi, configApi }) =>
+      SlackAuth.create({
+        discoveryApi,
+        oauthRequestApi,
+        defaultScopes: ['incoming-webhook', 'commands'],
         environment: configApi.getOptionalString('auth.environment'),
       }),
   }),

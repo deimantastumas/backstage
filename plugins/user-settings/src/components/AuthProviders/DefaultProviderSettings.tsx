@@ -27,6 +27,7 @@ import {
   bitbucketServerAuthApiRef,
   atlassianAuthApiRef,
   oneloginAuthApiRef,
+  slackAuthApiRef,
 } from '@backstage/core-plugin-api';
 
 /** @public */
@@ -57,6 +58,14 @@ export const DefaultProviderSettings = (props: {
           title="GitHub"
           description="Provides authentication towards GitHub APIs"
           apiRef={githubAuthApiRef}
+          icon={Star}
+        />
+      )}
+      {configuredProviders.includes('slack') && (
+        <ProviderSettingsItem
+          title="Slack"
+          description="Provides authentication towards Slack APIs"
+          apiRef={slackAuthApiRef}
           icon={Star}
         />
       )}

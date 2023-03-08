@@ -32,6 +32,7 @@ import { onelogin } from './onelogin';
 import { saml } from './saml';
 import { AuthProviderFactory } from './types';
 import { bitbucketServer } from './bitbucketServer';
+import { slack } from './slack';
 
 /**
  * All built-in auth provider integrations.
@@ -56,6 +57,7 @@ export const providers = Object.freeze({
   okta,
   onelogin,
   saml,
+  slack,
 });
 
 /**
@@ -80,4 +82,5 @@ export const defaultAuthProviderFactories: {
   bitbucket: bitbucket.create(),
   bitbucketServer: bitbucketServer.create(),
   atlassian: atlassian.create(),
+  slack: slack.create(),
 };

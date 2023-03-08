@@ -1,6 +1,12 @@
 app:
   title: Backstage Example App
-  baseUrl: http://localhost:3000
+  baseUrl: https://localhost:3000
+  https:
+    certificate:
+      cert:
+        $file: ./certs/localhost.pem
+      key:
+        $file: ./certs/localhost-key.pem
   #datadogRum:
   #  clientToken: '123456789'
   #  applicationId: qwerty
@@ -27,7 +33,13 @@ backend:
   # auth:
   #   keys:
   #     - secret: ${BACKEND_SECRET}
-  baseUrl: http://localhost:7007
+  https:
+    certificate:
+      cert:
+        $file: ./certs/localhost.pem
+      key:
+        $file: ./certs/localhost-key.pem
+  baseUrl: https://localhost:7007
   listen:
     port: 7007
   database:
@@ -36,7 +48,7 @@ backend:
   cache:
     store: memory
   cors:
-    origin: http://localhost:3000
+    origin: https://localhost:3000
     methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
     credentials: true
   csp:
@@ -122,6 +134,9 @@ proxy:
     target: https://your.stackstorm.instance.com/api
     headers:
       St2-Api-Key: ${ST2_API_KEY}
+
+  '/github':
+    target: https://api.github.com
 
 organization:
   name: My Company
@@ -376,6 +391,11 @@ auth:
         scopes: ${AUTH_ATLASSIAN_SCOPES}
     myproxy:
       development: {}
+    slack:
+      development:
+        clientId: ${AUTH_SLACK_CLIENT_ID}
+        clientSecret: ${AUTH_SLACK_CLIENT_SECRET}
+
 costInsights:
   engineerCost: 200000
   engineerThreshold: 0.5

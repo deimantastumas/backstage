@@ -4636,6 +4636,7 @@ __metadata:
     passport-oauth2: ^1.6.1
     passport-onelogin-oauth: ^0.0.1
     passport-saml: ^3.1.2
+    passport-slack: ^0.0.7
     supertest: ^6.1.3
     uuid: ^8.0.0
     winston: ^3.2.1
@@ -6558,6 +6559,33 @@ __metadata:
     "@testing-library/react": ^12.1.3
     "@testing-library/user-event": ^14.0.0
     "@types/node": ^16.11.26
+    cross-fetch: ^3.1.5
+    msw: ^1.0.0
+    react-use: ^17.2.4
+  peerDependencies:
+    react: ^16.13.1 || ^17.0.0
+    react-router-dom: 6.0.0-beta.0 || ^6.3.0
+  languageName: unknown
+  linkType: soft
+
+"@backstage/plugin-goalie-hub@^0.0.0, @backstage/plugin-goalie-hub@workspace:plugins/goalie-hub":
+  version: 0.0.0-use.local
+  resolution: "@backstage/plugin-goalie-hub@workspace:plugins/goalie-hub"
+  dependencies:
+    "@backstage/cli": "workspace:^"
+    "@backstage/core-app-api": "workspace:^"
+    "@backstage/core-components": "workspace:^"
+    "@backstage/core-plugin-api": "workspace:^"
+    "@backstage/dev-utils": "workspace:^"
+    "@backstage/test-utils": "workspace:^"
+    "@backstage/theme": "workspace:^"
+    "@material-ui/core": ^4.9.13
+    "@material-ui/icons": ^4.9.1
+    "@material-ui/lab": ^4.0.0-alpha.57
+    "@testing-library/jest-dom": ^5.10.1
+    "@testing-library/react": ^12.1.3
+    "@testing-library/user-event": ^14.0.0
+    "@types/node": "*"
     cross-fetch: ^3.1.5
     msw: ^1.0.0
     react-use: ^17.2.4
@@ -22799,6 +22827,7 @@ __metadata:
     "@backstage/plugin-gcalendar": "workspace:^"
     "@backstage/plugin-gcp-projects": "workspace:^"
     "@backstage/plugin-github-actions": "workspace:^"
+    "@backstage/plugin-goalie-hub": ^0.0.0
     "@backstage/plugin-gocd": "workspace:^"
     "@backstage/plugin-graphiql": "workspace:^"
     "@backstage/plugin-home": "workspace:^"
@@ -31757,6 +31786,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"passport-oauth@npm:~0.1.1":
+  version: 0.1.15
+  resolution: "passport-oauth@npm:0.1.15"
+  dependencies:
+    oauth: 0.9.x
+    passport: ~0.1.1
+    pkginfo: 0.2.x
+  checksum: 90907c58fc7016ebaa4a29a411f8bcaab69193f09b8df051dc1b4874adb30bd229f50d69a30ef675fd37e4dafe0588a1759294dbb06ad0107dc28dacfa5cb73a
+  languageName: node
+  linkType: hard
+
 "passport-onelogin-oauth@npm:^0.0.1":
   version: 0.0.1
   resolution: "passport-onelogin-oauth@npm:0.0.1"
@@ -31783,6 +31823,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"passport-slack@npm:^0.0.7":
+  version: 0.0.7
+  resolution: "passport-slack@npm:0.0.7"
+  dependencies:
+    passport-oauth: ~0.1.1
+    pkginfo: 0.2.x
+  checksum: e1c3f5728bdb62129dafa01e8fcdf00099b718c9d91a7ffb8b0b2979b832b15e40c9521f0d84db36f8e2a8091700412092c9dbff660be1fae8148011c97c65fb
+  languageName: node
+  linkType: hard
+
 "passport-strategy@npm:1.x.x, passport-strategy@npm:^1.0.0":
   version: 1.0.0
   resolution: "passport-strategy@npm:1.0.0"
@@ -31798,6 +31848,16 @@ __metadata:
     pause: 0.0.1
     utils-merge: ^1.0.1
   checksum: ef932ad671d50de34765c7a53cd1e058d8331a82a6df09265a9c6c1168911aee4a7b5215803d0101110ab7f317e096b4954ca7e18fb2c33b9929f0bd17dbe159
+  languageName: node
+  linkType: hard
+
+"passport@npm:~0.1.1":
+  version: 0.1.18
+  resolution: "passport@npm:0.1.18"
+  dependencies:
+    pause: 0.0.1
+    pkginfo: 0.2.x
+  checksum: 96bcc5397176898c42699fe85863140abf9d6b78ca74ae0f20978018e5e8804885dc44e18bdcdc29c20ec4f29d6818d0230b99e1cb3819a7b6189e3b5ad6ba6d
   languageName: node
   linkType: hard
 

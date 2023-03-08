@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Backstage Authors
+ * Copyright 2023 The Backstage Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { createRouteRef } from '@backstage/core-plugin-api';
 
-export * from './github';
-export * from './gitlab';
-export * from './google';
-export * from './oauth2';
-export * from './okta';
-export * from './saml';
-export * from './microsoft';
-export * from './onelogin';
-export * from './bitbucket';
-export * from './bitbucketServer';
-export * from './atlassian';
-export * from './slack';
-export type { OAuthApiCreateOptions, AuthApiCreateOptions } from './types';
+export const rootRouteRef = createRouteRef({
+  id: 'goalie-hub',
+});

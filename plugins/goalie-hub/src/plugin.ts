@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Backstage Authors
+ * Copyright 2023 The Backstage Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+  createPlugin,
+  createRoutableExtension,
+} from '@backstage/core-plugin-api';
 
-export * from './github';
-export * from './gitlab';
-export * from './google';
-export * from './oauth2';
-export * from './okta';
-export * from './saml';
-export * from './microsoft';
-export * from './onelogin';
-export * from './bitbucket';
-export * from './bitbucketServer';
-export * from './atlassian';
-export * from './slack';
-export type { OAuthApiCreateOptions, AuthApiCreateOptions } from './types';
+import { rootRouteRef } from './routes';
+
+export const goalieHubPlugin = createPlugin({
+  id: 'goalie-hub',
+  routes: {
+    root: rootRouteRef,
+  },
+});
+
+export const GoalieHubPage = goalieHubPlugin.provide(
+  createRoutableExtension({
+    name: 'GoalieHubPage',
+    component: () =>
+      import('./components/ExampleComponent').then(m => m.ExampleComponent),
+    mountPoint: rootRouteRef,
+  }),
+);

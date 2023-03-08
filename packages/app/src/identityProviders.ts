@@ -23,6 +23,7 @@ import {
   oneloginAuthApiRef,
   bitbucketAuthApiRef,
   bitbucketServerAuthApiRef,
+  slackAuthApiRef,
 } from '@backstage/core-plugin-api';
 
 export const providers = [
@@ -73,5 +74,11 @@ export const providers = [
     title: 'Bitbucket Server',
     message: 'Sign In using Bitbucket Server',
     apiRef: bitbucketServerAuthApiRef,
+  },
+  {
+    id: 'slack-auth-provider',
+    title: 'Slack',
+    message: 'Sign In using Slack',
+    apiRef: slackAuthApiRef,
   },
 ];

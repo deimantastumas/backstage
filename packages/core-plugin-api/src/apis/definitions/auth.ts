@@ -328,6 +328,12 @@ export const githubAuthApiRef: ApiRef<
   id: 'core.auth.github',
 });
 
+export const slackAuthApiRef: ApiRef<
+  OAuthApi & ProfileInfoApi & BackstageIdentityApi & SessionApi
+> = createApiRef({
+  id: 'core.auth.slack',
+});
+
 /**
  * Provides authentication towards Okta APIs.
  *
