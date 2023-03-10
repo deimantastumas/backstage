@@ -4636,7 +4636,7 @@ __metadata:
     passport-oauth2: ^1.6.1
     passport-onelogin-oauth: ^0.0.1
     passport-saml: ^3.1.2
-    passport-slack: ^0.0.7
+    passport-slack-oauth2: ^1.1.1
     supertest: ^6.1.3
     uuid: ^8.0.0
     winston: ^3.2.1
@@ -31763,7 +31763,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"passport-oauth2@npm:1.6.1, passport-oauth2@npm:1.x.x, passport-oauth2@npm:^1.1.2, passport-oauth2@npm:^1.4.0, passport-oauth2@npm:^1.6.0, passport-oauth2@npm:^1.6.1":
+"passport-oauth2@npm:1.6.1":
   version: 1.6.1
   resolution: "passport-oauth2@npm:1.6.1"
   dependencies:
@@ -31776,6 +31776,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"passport-oauth2@npm:1.x.x, passport-oauth2@npm:^1.1.2, passport-oauth2@npm:^1.4.0, passport-oauth2@npm:^1.5.0, passport-oauth2@npm:^1.6.0, passport-oauth2@npm:^1.6.1":
+  version: 1.7.0
+  resolution: "passport-oauth2@npm:1.7.0"
+  dependencies:
+    base64url: 3.x.x
+    oauth: 0.9.x
+    passport-strategy: 1.x.x
+    uid2: 0.0.x
+    utils-merge: 1.x.x
+  checksum: 9e93f1f47ad5c22ef119932e03f383b503f692012352f27d2a416cc45ca5448c5a97f726da51753fff9a2ec2b6255ac27f1e68c4b44538530d2a8de682f17d42
+  languageName: node
+  linkType: hard
+
 "passport-oauth@npm:1.0.0, passport-oauth@npm:^1.0.0":
   version: 1.0.0
   resolution: "passport-oauth@npm:1.0.0"
@@ -31783,17 +31796,6 @@ __metadata:
     passport-oauth1: 1.x.x
     passport-oauth2: 1.x.x
   checksum: e6d908ac6c305db1f4040538360c29ca1427b27772c74abaa75db24647db7ee1ccd9c6ccc1bb74649bca090f31f3225540539219b4a97b31c0c1434f4a9ee7b3
-  languageName: node
-  linkType: hard
-
-"passport-oauth@npm:~0.1.1":
-  version: 0.1.15
-  resolution: "passport-oauth@npm:0.1.15"
-  dependencies:
-    oauth: 0.9.x
-    passport: ~0.1.1
-    pkginfo: 0.2.x
-  checksum: 90907c58fc7016ebaa4a29a411f8bcaab69193f09b8df051dc1b4874adb30bd229f50d69a30ef675fd37e4dafe0588a1759294dbb06ad0107dc28dacfa5cb73a
   languageName: node
   linkType: hard
 
@@ -31823,13 +31825,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"passport-slack@npm:^0.0.7":
-  version: 0.0.7
-  resolution: "passport-slack@npm:0.0.7"
+"passport-slack-oauth2@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "passport-slack-oauth2@npm:1.1.1"
   dependencies:
-    passport-oauth: ~0.1.1
-    pkginfo: 0.2.x
-  checksum: e1c3f5728bdb62129dafa01e8fcdf00099b718c9d91a7ffb8b0b2979b832b15e40c9521f0d84db36f8e2a8091700412092c9dbff660be1fae8148011c97c65fb
+    passport-oauth2: ^1.5.0
+    pkginfo: ^0.4.1
+  checksum: 6126ec6d3d329197105c94beb25f277db678e2a2aae104ee62a9956ccfab561426c209541d0e124018c48550d95c9ee262cc90b103facf52e9e00edf16be476f
   languageName: node
   linkType: hard
 
@@ -31848,16 +31850,6 @@ __metadata:
     pause: 0.0.1
     utils-merge: ^1.0.1
   checksum: ef932ad671d50de34765c7a53cd1e058d8331a82a6df09265a9c6c1168911aee4a7b5215803d0101110ab7f317e096b4954ca7e18fb2c33b9929f0bd17dbe159
-  languageName: node
-  linkType: hard
-
-"passport@npm:~0.1.1":
-  version: 0.1.18
-  resolution: "passport@npm:0.1.18"
-  dependencies:
-    pause: 0.0.1
-    pkginfo: 0.2.x
-  checksum: 96bcc5397176898c42699fe85863140abf9d6b78ca74ae0f20978018e5e8804885dc44e18bdcdc29c20ec4f29d6818d0230b99e1cb3819a7b6189e3b5ad6ba6d
   languageName: node
   linkType: hard
 

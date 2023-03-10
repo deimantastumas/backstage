@@ -18,48 +18,60 @@ import { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import {
+  fetchApiRef,
   configApiRef,
-  githubAuthApiRef,
+  slackAuthApiRef,
   useApi,
 } from '@backstage/core-plugin-api';
 
-class GithubApi {
-  private token: string;
-  private backendUrl: string;
+type Fetch = (
+  input: RequestInfo | URL,
+  init?: RequestInit | undefined,
+) => Promise<Response>;
 
-  private constructor(token: string, backendUrl: string) {
+class SlackApi {
+  private token: string;
+  private baseUrl: string;
+  private fetch: Fetch;
+
+  private constructor(token: string, baseUrl: string, fetch: Fetch) {
     this.token = token;
-    this.backendUrl = backendUrl;
+    this.baseUrl = baseUrl;
+    this.fetch = fetch;
   }
 
   static fromConfig({
     token,
-    backendUrl,
+    fetch,
+    baseUrl,
   }: {
     token: string;
-    backendUrl: string;
+    baseUrl: string;
+    fetch: Fetch;
   }) {
-    return new GithubApi(token, backendUrl);
+    return new SlackApi(token, baseUrl, fetch);
   }
 
   public async search({
-    query: q,
+    query,
     page = 1,
-    limit: per_page = 5,
+    limit: count = 5,
   }: {
     query: string;
     page?: number;
     limit?: number;
   }) {
-    const response = await fetch(
-      `${this.backendUrl}/api/proxy/github/search/issues?q=${encodeURIComponent(
-        q,
-      )}&page=${page}&per_page=${per_page}`,
+    const response = await this.fetch(
+      `${
+        this.baseUrl
+      }/api/proxy/slack/search.messages?query=${encodeURIComponent(
+        query,
+      )}&page=${page}&count=${count}`,
       {
+        method: 'POST',
+        body: `token=${this.token}`,
         headers: {
-          Accept: 'application/vnd.github+json',
-          Authorization: `Bearer ${this.token}`,
-          'X-GitHub-Api-Version': '2022-11-28',
+          'Content-type': 'application/x-www-form-urlencoded',
         },
       },
     );
@@ -68,17 +80,19 @@ class GithubApi {
   }
 }
 
-export const useGithubApi = () => {
+export const useSlackApi = () => {
+  const fetchApi = useApi(fetchApiRef);
   const configApi = useApi(configApiRef);
-  const githubAuthApi = useApi(githubAuthApiRef);
+  const slackAuthApi = useApi(slackAuthApiRef);
 
   const { value: token } = useAsync(async () => {
-    return await githubAuthApi.getAccessToken(['read:user', 'repo']);
-  }, [githubAuthApi]);
+    return await slackAuthApi.getAccessToken();
+  }, [slackAuthApi]);
 
   return useMemo(() => {
     if (!token) return null;
-    const backendUrl = configApi.getString('backend.baseUrl');
-    return GithubApi.fromConfig({ token, backendUrl });
-  }, [token, configApi]);
+    const fetch = fetchApi.fetch;
+    const baseUrl = configApi.getString('backend.baseUrl');
+    return SlackApi.fromConfig({ token, fetch, baseUrl });
+  }, [token, fetchApi, configApi]);
 };

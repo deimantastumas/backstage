@@ -36,7 +36,7 @@ export default class SlackAuth {
       environment = 'development',
       provider = DEFAULT_PROVIDER,
       oauthRequestApi,
-      defaultScopes = ['incoming-webhook', 'commands'],
+      defaultScopes = ['search:read'],
     } = options;
 
     return OAuth2.create({

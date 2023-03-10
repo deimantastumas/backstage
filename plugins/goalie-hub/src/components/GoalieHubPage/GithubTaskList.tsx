@@ -40,9 +40,13 @@ import LaunchIcon from '@material-ui/icons/Launch';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 
-import { Progress } from '@backstage/core-components';
+import {
+  Progress,
+  EmptyState,
+  ResponseErrorPanel,
+} from '@backstage/core-components';
 
-import { useGithubApi } from './api';
+import { useGithubApi } from './githubApi';
 
 const useStyles = makeStyles({
   card: {
@@ -50,7 +54,6 @@ const useStyles = makeStyles({
   },
 });
 
-// TODO: renderSubheader, renderItem
 export const GithubTaskList = (props: any) => {
   const classes = useStyles();
   const githubApi = useGithubApi();
@@ -64,7 +67,7 @@ export const GithubTaskList = (props: any) => {
     setPage(1);
   }, [query, setPage]);
 
-  const { value } = useAsync(async () => {
+  const { loading, error, value } = useAsync(async () => {
     return await githubApi?.search({ query, page, limit });
   }, [githubApi, query, page, limit]);
 
@@ -83,8 +86,16 @@ export const GithubTaskList = (props: any) => {
     setPage(prevPage => prevPage + 1);
   }, [setPage]);
 
-  if (!value) {
+  if (loading) {
     return <Progress />;
+  }
+
+  if (error) {
+    return <ResponseErrorPanel error={error} />;
+  }
+
+  if (!value) {
+    return <EmptyState title="No tasks found" missing="info" />;
   }
 
   const { items, total_count: totalCount } = value;

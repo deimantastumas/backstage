@@ -31,7 +31,7 @@ export const GoalieHubPage = goalieHubPlugin.provide(
   createRoutableExtension({
     name: 'GoalieHubPage',
     component: () =>
-      import('./components/ExampleComponent').then(m => m.ExampleComponent),
+      import('./components/GoalieHubPage').then(m => m.GoalieHubPage),
     mountPoint: rootRouteRef,
   }),
 );

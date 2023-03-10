@@ -138,6 +138,9 @@ proxy:
   '/github':
     target: https://api.github.com
 
+  '/slack':
+    target: https://slack.com/api
+
 organization:
   name: My Company
 
@@ -325,7 +328,6 @@ auth:
       development:
         clientId: ${AUTH_GITHUB_CLIENT_ID}
         clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
-        enterpriseInstanceUrl: ${AUTH_GITHUB_ENTERPRISE_INSTANCE_URL}
     gitlab:
       development:
         clientId: ${AUTH_GITLAB_CLIENT_ID}
@@ -395,6 +397,7 @@ auth:
       development:
         clientId: ${AUTH_SLACK_CLIENT_ID}
         clientSecret: ${AUTH_SLACK_CLIENT_SECRET}
+        scope: ${AUTH_SLACK_CLIENT_SCOPE}
 
 costInsights:
   engineerCost: 200000
@@ -446,8 +449,10 @@ costInsights:
       kind: 'PINTS_OF_ICE_CREAM'
       unit: 'ice cream pint'
       rate: 5.5
+
 pagerduty:
   eventsBaseUrl: 'https://events.pagerduty.com/v2'
+
 jenkins:
   instances:
     - name: default

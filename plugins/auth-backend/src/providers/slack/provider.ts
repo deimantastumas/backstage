@@ -15,9 +15,21 @@
  */
 
 import express from 'express';
-import { Profile as PassportProfile } from 'passport';
-import { Strategy as SlackStrategy } from 'passport-slack';
-
+import passport from 'passport';
+import { OAuth2Client } from 'google-auth-library';
+import { Strategy as SlackStrategy } from 'passport-slack-oauth2';
+import {
+  encodeState,
+  OAuthAdapter,
+  OAuthEnvironmentHandler,
+  OAuthHandlers,
+  OAuthProviderOptions,
+  OAuthRefreshRequest,
+  OAuthResponse,
+  OAuthResult,
+  OAuthStartRequest,
+  OAuthLogoutRequest,
+} from '../../lib/oauth';
 import {
   executeFetchUserProfileStrategy,
   executeFrameHandlerStrategy,
@@ -27,204 +39,142 @@ import {
   PassportDoneCallback,
 } from '../../lib/passport';
 import {
-  OAuthStartResponse,
   AuthHandler,
-  SignInResolver,
-  StateEncoder,
   AuthResolverContext,
+  OAuthStartResponse,
+  SignInResolver,
 } from '../types';
-import {
-  OAuthAdapter,
-  OAuthProviderOptions,
-  OAuthHandlers,
-  OAuthEnvironmentHandler,
-  OAuthStartRequest,
-  encodeState,
-  OAuthRefreshRequest,
-} from '../../lib/oauth';
 import { createAuthProviderIntegration } from '../createAuthProviderIntegration';
 
-const ACCESS_TOKEN_PREFIX = 'access-token.';
-
-// TODO(Rugvip): Auth providers need a way to access this in a less hardcoded way
-const BACKSTAGE_SESSION_EXPIRATION = 3600;
-
 type PrivateInfo = {
-  refreshToken?: string;
+  refreshToken: string;
 };
 
-/** @public */
-export type SlackOAuthResult = {
-  fullProfile: PassportProfile;
-  params: {
-    scope: string;
-    expires_in?: string;
-    refresh_token_expires_in?: string;
-  };
-  accessToken: string;
-  refreshToken?: string;
-};
-
-export type SlackAuthProviderOptions = OAuthProviderOptions & {
-  signInResolver?: SignInResolver<SlackOAuthResult>;
-  authHandler: AuthHandler<SlackOAuthResult>;
-  stateEncoder: StateEncoder;
+type SlackAuthProviderOptions = OAuthProviderOptions & {
+  scope: string[];
+  signInResolver?: SignInResolver<OAuthResult>;
+  authHandler: AuthHandler<OAuthResult>;
   resolverContext: AuthResolverContext;
 };
 
 export class SlackAuthProvider implements OAuthHandlers {
-  private readonly _strategy: SlackStrategy;
-  private readonly signInResolver?: SignInResolver<SlackOAuthResult>;
-  private readonly authHandler: AuthHandler<SlackOAuthResult>;
+  private readonly strategy: SlackStrategy;
+  private readonly signInResolver?: SignInResolver<OAuthResult>;
+  private readonly authHandler: AuthHandler<OAuthResult>;
   private readonly resolverContext: AuthResolverContext;
-  private readonly stateEncoder: StateEncoder;
 
   constructor(options: SlackAuthProviderOptions) {
-    this.signInResolver = options.signInResolver;
     this.authHandler = options.authHandler;
-    this.stateEncoder = options.stateEncoder;
+    this.signInResolver = options.signInResolver;
     this.resolverContext = options.resolverContext;
-    this._strategy = new SlackStrategy(
+
+    this.strategy = new SlackStrategy(
       {
         clientID: options.clientId,
         clientSecret: options.clientSecret,
-        scope: ['identity.basic', 'channels:read', 'chat:write:user'],
+        scope: options.scope,
       },
       (
         accessToken: any,
         refreshToken: any,
         params: any,
-        fullProfile: any,
-        done: PassportDoneCallback<SlackOAuthResult, PrivateInfo>,
+        fullProfile: passport.Profile,
+        done: PassportDoneCallback<OAuthResult, PrivateInfo>,
       ) => {
-        done(undefined, { fullProfile, params, accessToken }, { refreshToken });
+        done(
+          undefined,
+          {
+            fullProfile,
+            params,
+            accessToken,
+            refreshToken,
+          },
+          {
+            refreshToken,
+          },
+        );
       },
     );
   }
 
   async start(req: OAuthStartRequest): Promise<OAuthStartResponse> {
-    return await executeRedirectStrategy(req, this._strategy, {
+    return await executeRedirectStrategy(req, this.strategy, {
+      accessType: 'offline',
+      prompt: 'consent',
       scope: req.scope,
-      state: (await this.stateEncoder(req)).encodedState,
+      state: encodeState(req.state),
     });
   }
 
   async handler(req: express.Request) {
     const { result, privateInfo } = await executeFrameHandlerStrategy<
-      SlackOAuthResult,
+      OAuthResult,
       PrivateInfo
-    >(req, this._strategy);
-
-    let refreshToken = privateInfo.refreshToken;
-
-    // If we do not have a real refresh token and we have a non-expiring
-    // access token, then we use that as our refresh token.
-    if (!refreshToken && !result.params.expires_in) {
-      refreshToken = ACCESS_TOKEN_PREFIX + result.accessToken;
-    }
+    >(req, this.strategy);
 
     return {
       response: await this.handleResult(result),
-      refreshToken,
+      refreshToken: privateInfo.refreshToken,
     };
+  }
+
+  async logout(req: OAuthLogoutRequest) {
+    const oauthClient = new OAuth2Client();
+    await oauthClient.revokeToken(req.refreshToken);
   }
 
   async refresh(req: OAuthRefreshRequest) {
-    // We've enable persisting scope in the OAuth provider, so scope here will
-    // be whatever was stored in the cookie
-    const { scope, refreshToken } = req;
+    const { accessToken, refreshToken, params } =
+      await executeRefreshTokenStrategy(
+        this.strategy,
+        req.refreshToken,
+        req.scope,
+      );
 
-    // This is the OAuth App flow. A non-expiring access token is stored in the
-    // refresh token cookie. We use that token to fetch the user profile and
-    // refresh the Backstage session when needed.
-    if (refreshToken?.startsWith(ACCESS_TOKEN_PREFIX)) {
-      const accessToken = refreshToken.slice(ACCESS_TOKEN_PREFIX.length);
-
-      const fullProfile = await executeFetchUserProfileStrategy(
-        this._strategy,
-        accessToken,
-      ).catch(error => {
-        if (error.oauthError?.statusCode === 401) {
-          throw new Error('Invalid access token');
-        }
-        throw error;
-      });
-
-      return {
-        response: await this.handleResult({
-          fullProfile,
-          params: { scope },
-          accessToken,
-        }),
-        refreshToken,
-      };
-    }
-
-    // This is the App flow, which is close to a standard OAuth refresh flow. It has a
-    // pretty long session expiration, and it also ignores the requested scope, instead
-    // just allowing access to whatever is configured as part of the app installation.
-    const result = await executeRefreshTokenStrategy(
-      this._strategy,
-      refreshToken,
-      scope,
+    const fullProfile = await executeFetchUserProfileStrategy(
+      this.strategy,
+      accessToken,
     );
+
     return {
       response: await this.handleResult({
-        fullProfile: await executeFetchUserProfileStrategy(
-          this._strategy,
-          result.accessToken,
-        ),
-        params: { ...result.params, scope },
-        accessToken: result.accessToken,
+        fullProfile,
+        params,
+        accessToken,
       }),
-      refreshToken: result.refreshToken,
+      refreshToken,
     };
   }
 
-  private async handleResult(result: SlackOAuthResult) {
+  private async handleResult(result: OAuthResult) {
     const { profile } = await this.authHandler(result, this.resolverContext);
 
-    const expiresInStr = result.params.expires_in;
-    let expiresInSeconds =
-      expiresInStr === undefined ? undefined : Number(expiresInStr);
-
-    let backstageIdentity = undefined;
+    const response: OAuthResponse = {
+      providerInfo: {
+        idToken: result.params.id_token,
+        accessToken: result.accessToken,
+        scope: result.params.scope,
+        expiresInSeconds: result.params.expires_in,
+      },
+      profile,
+    };
 
     if (this.signInResolver) {
-      backstageIdentity = await this.signInResolver(
+      response.backstageIdentity = await this.signInResolver(
         {
           result,
           profile,
         },
         this.resolverContext,
       );
-
-      // GitHub sessions last longer than Backstage sessions, so if we're using
-      // GitHub for sign-in, then we need to expire the sessions earlier
-      if (expiresInSeconds) {
-        expiresInSeconds = Math.min(
-          expiresInSeconds,
-          BACKSTAGE_SESSION_EXPIRATION,
-        );
-      } else {
-        expiresInSeconds = BACKSTAGE_SESSION_EXPIRATION;
-      }
     }
 
-    return {
-      backstageIdentity,
-      providerInfo: {
-        accessToken: result.accessToken,
-        scope: result.params.scope,
-        expiresInSeconds,
-      },
-      profile,
-    };
+    return response;
   }
 }
 
 /**
- * Auth provider integration for GitHub auth
+ * Auth provider integration for Google auth
  *
  * @public
  */
@@ -234,7 +184,7 @@ export const slack = createAuthProviderIntegration({
      * The profile transformation function used to verify and convert the auth response
      * into the profile that will be presented to the user.
      */
-    authHandler?: AuthHandler<SlackOAuthResult>;
+    authHandler?: AuthHandler<OAuthResult>;
 
     /**
      * Configure sign-in for this provider, without it the provider can not be used to sign users in.
@@ -243,84 +193,42 @@ export const slack = createAuthProviderIntegration({
       /**
        * Maps an auth result to a Backstage identity for the user.
        */
-      resolver: SignInResolver<SlackOAuthResult>;
+      resolver: SignInResolver<OAuthResult>;
     };
-
-    /**
-     * The state encoder used to encode the 'state' parameter on the OAuth request.
-     *
-     * It should return a string that takes the state params (from the request), url encodes the params
-     * and finally base64 encodes them.
-     *
-     * Providing your own stateEncoder will allow you to add addition parameters to the state field.
-     *
-     * It is typed as follows:
-     *   `export type StateEncoder = (input: OAuthState) => Promise<{encodedState: string}>;`
-     *
-     * Note: the stateEncoder must encode a 'nonce' value and an 'env' value. Without this, the OAuth flow will fail
-     * (These two values will be set by the req.state by default)
-     *
-     * For more information, please see the helper module in ../../oauth/helpers #readState
-     */
-    stateEncoder?: StateEncoder;
   }) {
     return ({ providerId, globalConfig, config, resolverContext }) =>
       OAuthEnvironmentHandler.mapConfig(config, envConfig => {
         const clientId = envConfig.getString('clientId');
         const clientSecret = envConfig.getString('clientSecret');
+        const customScope = envConfig.getOptionalStringArray('scope');
         const customCallbackUrl = envConfig.getOptionalString('callbackUrl');
+
         const callbackUrl =
           customCallbackUrl ||
-          `${globalConfig.baseUrl}/api/${providerId}/handler/frame`;
+          `${globalConfig.baseUrl}/${providerId}/handler/frame`;
 
-        const authHandler: AuthHandler<SlackOAuthResult> = options?.authHandler
+        const scope = customScope || ['search:read'];
+
+        const authHandler: AuthHandler<OAuthResult> = options?.authHandler
           ? options.authHandler
-          : async ({ fullProfile }) => {
-              return {
-                profile: makeProfileInfo(fullProfile),
-              };
-            };
-
-        const stateEncoder: StateEncoder =
-          options?.stateEncoder ??
-          (async (
-            req: OAuthStartRequest,
-          ): Promise<{ encodedState: string }> => {
-            return { encodedState: encodeState(req.state) };
-          });
+          : async ({ fullProfile, params }) => ({
+              profile: makeProfileInfo(fullProfile, params.id_token),
+            });
 
         const provider = new SlackAuthProvider({
           clientId,
           clientSecret,
           callbackUrl,
+          scope,
           signInResolver: options?.signIn?.resolver,
           authHandler,
-          stateEncoder,
           resolverContext,
         });
 
         return OAuthAdapter.fromConfig(globalConfig, provider, {
-          persistScopes: true,
           providerId,
           callbackUrl,
         });
       });
-  },
-  resolvers: {
-    /**
-     * Looks up the user by matching their Slack username to the entity name.
-     */
-    usernameMatchingUserEntityName: (): SignInResolver<SlackOAuthResult> => {
-      return async (info, ctx) => {
-        const { fullProfile } = info.result;
-
-        const userId = fullProfile.username;
-        if (!userId) {
-          throw new Error(`Slack user profile does not contain a username`);
-        }
-
-        return ctx.signInWithCatalogUser({ entityRef: { name: userId } });
-      };
-    },
   },
 });

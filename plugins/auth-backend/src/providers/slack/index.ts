@@ -15,4 +15,3 @@
  */
 
 export { slack } from './provider';
-export type { SlackOAuthResult } from './provider';

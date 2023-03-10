@@ -152,3 +152,6 @@ tsconfig.tmp.json
 
 # vscode database functionality support files
 *.session.sql
+
+# SSL certificate
+certs

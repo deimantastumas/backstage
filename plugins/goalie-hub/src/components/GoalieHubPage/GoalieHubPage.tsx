@@ -28,8 +28,9 @@ import {
 } from '@backstage/core-components';
 
 import { GithubTaskList } from './GithubTaskList';
+import { SlackTaskList } from './SlackTaskList';
 
-export const ExampleComponent = () => (
+export const GoalieHubPage = () => (
   <Page themeId="tool">
     <Header title="Welcome to goalie-hub!" subtitle="Optional subtitle">
       <HeaderLabel label="Owner" value="Team X" />
@@ -51,6 +52,11 @@ export const ExampleComponent = () => (
             title="Issues"
             defaultQuery="repo:backstage/backstage type:issue state:open label:search,homepage"
           />
+        </Grid>
+      </Grid>
+      <Grid container spacing={2} direction="row" alignItems="stretch">
+        <Grid item xs={12} md={6}>
+          <SlackTaskList title="Messages" defaultQuery="Backstage" />
         </Grid>
       </Grid>
     </Content>

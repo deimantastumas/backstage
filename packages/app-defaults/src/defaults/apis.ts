@@ -177,7 +177,7 @@ export const apis = [
       SlackAuth.create({
         discoveryApi,
         oauthRequestApi,
-        defaultScopes: ['incoming-webhook', 'commands'],
+        defaultScopes: ['search:read'],
         environment: configApi.getOptionalString('auth.environment'),
       }),
   }),

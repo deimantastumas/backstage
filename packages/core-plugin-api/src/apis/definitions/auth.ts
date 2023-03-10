@@ -329,7 +329,11 @@ export const githubAuthApiRef: ApiRef<
 });
 
 export const slackAuthApiRef: ApiRef<
-  OAuthApi & ProfileInfoApi & BackstageIdentityApi & SessionApi
+  OAuthApi &
+    OpenIdConnectApi &
+    ProfileInfoApi &
+    BackstageIdentityApi &
+    SessionApi
 > = createApiRef({
   id: 'core.auth.slack',
 });
