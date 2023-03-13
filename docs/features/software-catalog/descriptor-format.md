@@ -645,7 +645,7 @@ The following describes the following entity kind:
 
 | Field        | Value                  |
 | ------------ | ---------------------- |
-| `apiVersion` | `backstage.io/v1beta2` |
+| `apiVersion` | `scaffolder.backstage.io/v1beta3` |
 | `kind`       | `Template`             |
 
 A template definition describes both the parameters that are rendered in the
@@ -655,7 +655,7 @@ scaffolding that component.
 Descriptor files for this kind may look as follows.
 
 ```yaml
-apiVersion: backstage.io/v1beta2
+apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 # some metadata about the template itself
 metadata:
